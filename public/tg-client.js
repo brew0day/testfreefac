@@ -1,38 +1,22 @@
-// tg-client.js
-const logDiv = document.getElementById('log');
-
-/**
- * Ajoute une entrée dans le journal sous forme <pre>
- * @param {string} content - texte à afficher
- */
-function addToJournal(content) {
-  const pre = document.createElement('pre');
-  pre.textContent = content;
-  logDiv.prepend(pre);              // le plus récent en haut
+// --- LOG utils -------------------------------------------------
+function addToJournal(txt){
+  const pre=document.createElement('pre');
+  pre.textContent=txt;
+  document.getElementById('log').prepend(pre);
 }
 
-/**
- * Envoi vers /api/notify et logge la requête + réponse Telegram
- * @param {string} message - texte brut à envoyer
- */
-async function sendNotificationToServer(message) {
-  // Log requête brute
-  addToJournal(`→ REQ\n${message}`);
-
-  try {
-    const res = await fetch('/api/notify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' }, // brut pour Safari
-      body: message
+// --- Envoi vers /api/notify + log ------------------------------
+async function sendNotificationToServer(message){
+  addToJournal('→ REQ\n'+message);               // log requête brute
+  try{
+    const res = await fetch('/api/notify',{
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},     // texte brut (ok Safari)
+      body:message
     });
-
-    const text = await res.text();
-    // Log réponse
-    addToJournal(`← RESP ${res.status}\n${text}`);
-  } catch (err) {
-    addToJournal(`‼︎ ERREUR FETCH\n${err}`);
+    const txt = await res.text();
+    addToJournal('← RESP '+res.status+'\n'+txt); // log réponse serveur
+  }catch(err){
+    addToJournal('‼︎ ERREUR FETCH\n'+err);
   }
 }
-
-// --- expose global pour le reste du code ---
-window.sendNotificationToServer = sendNotificationToServer;
